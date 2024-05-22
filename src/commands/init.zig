@@ -60,4 +60,6 @@ pub fn run(allocator: std.mem.Allocator, args: *std.process.ArgIterator) anyerro
     _ = fd.write("ref: refs/heads/main\n") catch |e| {
         return e;
     };
+
+    std.debug.print("Initialized git_clone directory", .{});
 }
