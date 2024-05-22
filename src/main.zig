@@ -22,8 +22,14 @@ pub fn main() !void {
     }
 
     const command = it.next();
+
+    if (command == null) {
+        // should print help
+        return;
+    }
+
     if (std.mem.eql(u8, command.?, "init")) {
         // init
-        try init.run(alloc, &it);
+        _ = try init.run(alloc, &it);
     }
 }
