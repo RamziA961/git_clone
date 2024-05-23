@@ -1,9 +1,8 @@
 const std = @import("std");
 const fs_utils = @import("../utils/fs.zig");
-const DIRNAME = @import("../configuration.zig").DIRNAME;
 
-pub fn run(allocator: std.mem.Allocator, args: *std.process.ArgIterator) anyerror!fs_utils.InitializationResult {
-    if (@constCast(args).next()) |_| {
+pub fn run(allocator: std.mem.Allocator, args: std.ArrayList([]const u8)) anyerror!fs_utils.InitializationResult {
+    if (args.items.len > 0) {
         // this could be -h
         // won't handle this case for now
     }

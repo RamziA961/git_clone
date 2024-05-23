@@ -16,20 +16,23 @@ pub fn main() !void {
     defer it.deinit();
 
     // skip executable invocation
-    if (!it.skip()) {
-        std.log.err("No arguments received\n", .{});
+    _ = it.skip();
+
+    var args = std.ArrayList([]const u8).init(alloc);
+    defer args.deinit();
+
+    while (it.next()) |arg| {
+        try args.append(arg);
+    }
+
+    if (args.items.len == 0) {
+        std.debug.print("No arguments received.", .{});
         return;
     }
 
-    const command = it.next();
-
-    if (command == null) {
-        // should print help
-        return;
-    }
-
-    if (std.mem.eql(u8, command.?, "init")) {
+    const command = args.items[0];
+    if (std.mem.eql(u8, command, "init")) {
         // init
-        _ = try init.run(alloc, &it);
+        _ = try init.run(alloc, args);
     }
 }
