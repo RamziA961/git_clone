@@ -48,14 +48,15 @@ pub fn initializeRepository(allocator: std.mem.Allocator) InitializationResult {
 
     // Assuming that files are not initialized in the directory after its initialization.
     // Time of check time of use errors are unlikely
-    const obj_path = std.fs.path.join(allocator, &[_][]const u8{ rel_path, "objects" }) catch |e| {
+    const obj_path = getGitSubDirectoryPath(allocator, .Object) catch |e| {
         return InitializationResult{ .err = e };
     };
     defer allocator.free(obj_path);
 
-    const refs_path = std.fs.path.join(allocator, &[_][]const u8{ rel_path, "refs" }) catch |e| {
+    const refs_path = getGitSubDirectoryPath(allocator, .Refs) catch |e| {
         return InitializationResult{ .err = e };
     };
+
     defer allocator.free(refs_path);
 
     const head_path = std.fs.path.join(allocator, &[_][]const u8{ rel_path, "HEAD" }) catch |e| {
@@ -93,6 +94,7 @@ pub const DirectoryData = struct {
 };
 
 /// Retrieve path to known Git sub-directories.
+/// The returned path must be deallocated.
 pub fn getGitSubDirectoryPath(allocator: std.mem.Allocator, sub_dir: SubDirectory) ![]u8 {
     const rel_path = try std.fs.path.join(allocator, &[_][]const u8{ ".", DIRNAME });
     const path = switch (sub_dir) {
@@ -103,7 +105,7 @@ pub fn getGitSubDirectoryPath(allocator: std.mem.Allocator, sub_dir: SubDirector
 }
 
 /// Access known Git sub-directories.
-/// Returns a handle to an open directory. The opened directory must be closed.
+/// Returns a handle to an open directory. The opened directory must be closed and the returned path must be deallocated.
 pub fn getGitSubDirectory(allocator: std.mem.Allocator, sub_dir: SubDirectory) std.fs.Dir.OpenError!DirectoryData {
     const cwd = std.fs.cwd();
     const path = getGitSubDirectoryPath(allocator, sub_dir);
