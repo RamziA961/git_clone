@@ -56,7 +56,6 @@ pub fn initializeRepository(allocator: std.mem.Allocator) InitializationResult {
     const refs_path = getGitSubDirectoryPath(allocator, .Refs) catch |e| {
         return InitializationResult{ .err = e };
     };
-
     defer allocator.free(refs_path);
 
     const head_path = std.fs.path.join(allocator, &[_][]const u8{ rel_path, "HEAD" }) catch |e| {
@@ -97,9 +96,11 @@ pub const DirectoryData = struct {
 /// The returned path must be deallocated.
 pub fn getGitSubDirectoryPath(allocator: std.mem.Allocator, sub_dir: SubDirectory) ![]u8 {
     const rel_path = try std.fs.path.join(allocator, &[_][]const u8{ ".", DIRNAME });
+    defer allocator.free(rel_path);
+
     const path = switch (sub_dir) {
-        .Object => try std.fs.path.join(allocator, .{ rel_path, "objects" }),
-        .Refs => try std.fs.path.join(allocator, .{ rel_path, "refs" }),
+        .Object => try std.fs.path.join(allocator, &[_][]const u8{ rel_path, "objects" }),
+        .Refs => try std.fs.path.join(allocator, &[_][]const u8{ rel_path, "refs" }),
     };
     return path;
 }
@@ -108,8 +109,12 @@ pub fn getGitSubDirectoryPath(allocator: std.mem.Allocator, sub_dir: SubDirector
 /// Returns a handle to an open directory. The opened directory must be closed and the returned path must be deallocated.
 pub fn getGitSubDirectory(allocator: std.mem.Allocator, sub_dir: SubDirectory) std.fs.Dir.OpenError!DirectoryData {
     const cwd = std.fs.cwd();
+
     const path = getGitSubDirectoryPath(allocator, sub_dir);
+    errdefer allocator.free(path);
+
     const handle = cwd.openDir(path, .{ .access_sub_paths = true });
+
     return DirectoryData{
         handle,
         path,
