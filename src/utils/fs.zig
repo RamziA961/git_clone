@@ -81,3 +81,35 @@ pub fn initializeRepository(allocator: std.mem.Allocator) InitializationResult {
 
     return InitializationResult.ok;
 }
+
+pub const SubDirectory = enum {
+    Object,
+    Refs,
+};
+
+pub const DirectoryData = struct {
+    handle: std.fs.Dir,
+    path: std.ArrayList(u8),
+};
+
+/// Retrieve path to known Git sub-directories.
+pub fn getGitSubDirectoryPath(allocator: std.mem.Allocator, sub_dir: SubDirectory) ![]u8 {
+    const rel_path = try std.fs.path.join(allocator, &[_][]const u8{ ".", DIRNAME });
+    const path = switch (sub_dir) {
+        .Object => try std.fs.path.join(allocator, .{ rel_path, "objects" }),
+        .Refs => try std.fs.path.join(allocator, .{ rel_path, "refs" }),
+    };
+    return path;
+}
+
+/// Access known Git sub-directories.
+/// Returns a handle to an open directory. The opened directory must be closed.
+pub fn getGitSubDirectory(allocator: std.mem.Allocator, sub_dir: SubDirectory) std.fs.Dir.OpenError!DirectoryData {
+    const cwd = std.fs.cwd();
+    const path = getGitSubDirectoryPath(allocator, sub_dir);
+    const handle = cwd.openDir(path, .{ .access_sub_paths = true });
+    return DirectoryData{
+        handle,
+        path,
+    };
+}
