@@ -24,3 +24,7 @@ pub const Token = union(TokenTag) {
     // slice of bytes
     Ident: []const u8,
 };
+
+pub const InvalidTokenError = struct {
+    argument: []const u8,
+};
