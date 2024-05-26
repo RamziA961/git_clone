@@ -22,6 +22,8 @@ pub const Lexer = struct {
             const tokens = self.next(allocator) catch {
                 return error.UnhandledError;
             };
+            defer allocator.free(tokens);
+
             token_buf.appendSlice(tokens) catch {
                 return error.UnhandledError;
             };

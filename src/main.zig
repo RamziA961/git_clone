@@ -40,7 +40,10 @@ pub fn main() !void {
 
     var lexer = parse.lexer.Lexer.init(&args);
     const tokens = try lexer.tokenize(alloc);
+    defer alloc.free(tokens);
+
+    std.debug.print("\n", .{});
     for (tokens) |tok| {
-        std.debug.print("{any}\n", .{tok});
+        tok.debugPrint();
     }
 }
