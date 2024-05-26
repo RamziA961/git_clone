@@ -1,5 +1,7 @@
 const std = @import("std");
-const init = @import("./commands/init.zig");
+const parse = @import("parse.zig");
+
+//const init = @import("./commands/init.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -25,14 +27,20 @@ pub fn main() !void {
         try args.append(arg);
     }
 
-    if (args.items.len == 0) {
-        std.debug.print("No arguments received.", .{});
-        return;
-    }
+    // if (args.items.len == 0) {
+    //     std.debug.print("No arguments received.", .{});
+    //     return;
+    // }
 
-    const command = args.items[0];
-    if (std.mem.eql(u8, command, "init")) {
-        // init
-        _ = try init.run(alloc, args);
+    // const command = args.items[0];
+    // if (std.mem.eql(u8, command, "init")) {
+    //     // init
+    //     _ = try init.run(alloc, args);
+    // }
+
+    var lexer = parse.lexer.Lexer.init(&args);
+    const tokens = try lexer.tokenize(alloc);
+    for (tokens) |tok| {
+        std.debug.print("{any}\n", .{tok});
     }
 }

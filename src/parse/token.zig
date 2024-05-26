@@ -25,6 +25,4 @@ pub const Token = union(TokenTag) {
     Ident: []const u8,
 };
 
-pub const InvalidTokenError = struct {
-    argument: []const u8,
-};
+pub const InvalidTokenError = error{ UnrecognizedToken, MalformedToken };
